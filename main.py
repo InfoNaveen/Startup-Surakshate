@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(_file_)))
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -81,4 +84,5 @@ async def health_check():
     return {"status": "ok"}
 
 if __name__ == "__main__":
+
     uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
