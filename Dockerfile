@@ -1,22 +1,20 @@
-FROM python:3.9-slim
-
-WORKDIR /app
-
-# Install system dependencies for pdfkit
-RUN apt-get update && apt-get install -y \
-    wkhtmltopdf \
+# 1. --- Install System Dependencies ---
+# wkhtmltopdf is not in the default Debian (slim) repos.
+# We must download and install it manually.
+# We also need wget (to download) and other font dependencies.
+RUN apt-get update \
+    && apt-get install -y \
+    wget \
+    fontconfig \
+    libxrender1 \
+    libxext6 \
+    xfonts-75dpi \
+    xfonts-base \
+    && wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
+    && dpkg -i wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
+    # Install any missing dependencies that dpkg might have noted
+    && apt-get install -y -f \
+    # Clean up
+    && rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements first for better caching
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy the rest of the application
-COPY . .
-
-# Expose the port the app runs on
-EXPOSE 8000
-
-# Command to run the application
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
